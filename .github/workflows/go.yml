@@ -18,9 +18,7 @@ jobs:
       with:
         go-version: 1.18
         cache: true
-      run: |
-        go get github.com/mitchellh/gox
-        go get github.com/tcnksm/ghr
+      run: go get github.com/mitchellh/gox
 
     - name: Build
-      run: gox -arch="amd64" -os="darwin windows linux" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" ./...
+      run: gox -arch="amd64" -os="darwin windows linux" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -ldflags="-X 'main.Version=0.5'" ./cmd/schema/*.go
