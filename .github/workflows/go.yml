@@ -26,4 +26,5 @@ jobs:
 
     - name: Build
       run: |
-        go run github.com/mitchellh/gox -verbose -arch="amd64" -os="darwin windows linux" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -ldflags="-X 'main.Version=0.5'" ./cmd/schema/
+        go run github.com/mitchellh/gox -verbose -osarch="linux/amd64 windows/amd64 darwin/amd64 darwin/arm64" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./cmd/schema/
+        go run github.com/tcnksm/ghr -u tariel-x -t $GHR_TOKEN -prerelease ${{ github.ref_name }}  dist/
