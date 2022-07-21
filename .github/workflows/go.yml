@@ -25,4 +25,4 @@ jobs:
         go get github.com/tcnksm/ghr
 
     - name: Build
-      run: gox -arch="amd64" -os="darwin windows linux" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -ldflags="-X 'main.Version=0.5'" ./cmd/schema/*.go
+      run: go run github.com/mitchellh/gox -arch="amd64" -os="darwin windows linux" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -ldflags="-X 'main.Version=0.5'" ./cmd/schema/*.go
