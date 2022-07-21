@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = "main";
+
+import "topic_option.proto";
+
+
+message Weather {
+  option (topic) = "weather";
+  option (record) = "weather";
+
+  string city = 1;
+  float temperature = 2;
+  float wind = 3;
+  int32 visibility = 4;
+  string weather = 5;
+  string time = 6;
+}

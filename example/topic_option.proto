@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = "main";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+  string topic = 50001;
+  string record = 50002;
+}
