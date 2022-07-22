@@ -27,4 +27,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: youlatech/schema:latest
+          tags: youlatech/schema:latest,youlatech/schema:${{ github.ref_name }}
