@@ -8,10 +8,7 @@ Utility for your CI/CD process to validate, register or delete Kafka protobuf sc
 > This utility uses [TopicRecordNameStrategy](https://docs.confluent.io/platform/current/schema-registry/serdes-develop/index.html#overview), 
 > which means that the subject for the value is defined as `<topic name>-<fully-qualified record name>-value`.
 > This utility operates only with topic and record values and hides subject name generation. 
-> Also, the ability to create schemes for the topic keys is not realized for now. 
-
-
-[[_TOC_]]
+> Also, the ability to create schemes for the topic keys is not realized for now.
 
 # Commands
 
@@ -163,11 +160,21 @@ Utility gets configuration values with CLI flags (e.g. `--sr http://localhost:80
 
 The common environmental variables `SCHEMA_REGISTRY` and `CLUSTER` can be placed to the dotenv file located with `SCHEMA_CONFIG=/home/user/.schema_config` env variable.
 
+## Docker
+
+Run with docker:
+
+```bash
+docker run youlatech/schema:latest schema
+```
+
 ## Local build
 
 ```bash
 go build -ldflags="-X 'main.Version=0.5'" -o schema ./cmd/schema/*.go
 ```
+
+The last binary can also be downloaded from [the releases page](https://github.com/youla-dev/schema/releases).
 
 ## CD/CD
 
@@ -175,7 +182,7 @@ Example for the GitLab CI:
 
 ```yaml
 producer1:schema-validate:
-  image: registry-gitlab.company.org/sr/schema:1.0
+  image: youlatech/schema:latest
   script:
     - schema validate --proto services/$PROTO --cluster ${KAFKA_CLUSTER} --sr ${SR}
   variables:

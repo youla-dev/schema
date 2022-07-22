@@ -10,8 +10,6 @@
 > В этой утилите вместо subject везде фигурируют Kafka topic и record, а все схемы создаются для value сообщения.
 > Создать схему для key или с другой стратегией именования пока нельзя.
 
-[[_TOC_]]
-
 # Функции
 
 - `validate` - проверяет, что схема совместима с существующей
@@ -162,11 +160,21 @@ func getTopicRecord(m interface{}) (string, string) {
 Переменные окружения `SCHEMA_REGISTRY` и `CLUSTER` можно определить в dotenv файле, например `.schema_config`,
 путь к которому передать через переменную `SCHEMA_CONFIG=/home/user/.schema_config`.
 
+## Docker
+
+Запуск с помощью docker:
+
+```bash
+docker run youlatech/schema:latest schema
+```
+
 ## Локально
 
 ```bash
 go build -ldflags="-X 'main.Version=0.5'" -o schema ./cmd/schema/*.go
 ```
+
+Либо можно скачать последнюю версию со [страницы релизов](https://github.com/youla-dev/schema/releases).
 
 ## В CD/CD
 
@@ -175,6 +183,17 @@ go build -ldflags="-X 'main.Version=0.5'" -o schema ./cmd/schema/*.go
 
 ```bash
 PROTO=message.proto TOPIC=current_weather CLUSTER=localhost:9092 SCHEMA_REGISTRY=http://localhost:8081 schema validate
+```
+
+Пример для Gitlab CI:
+
+```yaml
+producer1:schema-validate:
+  image: youlatech/schema:latest
+  script:
+    - schema validate --proto services/$PROTO --cluster ${KAFKA_CLUSTER} --sr ${SR}
+  variables:
+    PROTO: producer1/cmd/producer1/weather_message.proto
 ```
 
 # Тестирование со schema-registry.
