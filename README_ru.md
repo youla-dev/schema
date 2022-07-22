@@ -174,6 +174,8 @@ docker run youlatech/schema:latest schema
 go build -ldflags="-X 'main.Version=0.5'" -o schema ./cmd/schema/*.go
 ```
 
+Либо можно скачать последнюю версию со [страницы релизов](https://github.com/youla-dev/schema/releases).
+
 ## В CD/CD
 
 Любой параметр в `schema` можно передать как аргументом (e.g. `--cluster localhost:9092`), так и через переменную окружения, например `CLUSTER=localhost:9092`.

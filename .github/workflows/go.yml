@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: |
         go run github.com/mitchellh/gox -verbose -osarch="linux/amd64 windows/amd64 darwin/amd64 darwin/arm64" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./cmd/schema/
-        go run github.com/tcnksm/ghr -u youla-dev -t ${{ secrets.GHR_TOKEN }} -prerelease ${{ github.ref_name }} dist/
+        go run github.com/tcnksm/ghr -u youla-dev -t ${{ secrets.GHR_TOKEN }} -recreate -prerelease ${{ github.ref_name }} dist/

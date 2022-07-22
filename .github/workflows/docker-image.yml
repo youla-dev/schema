@@ -1,7 +1,6 @@
 name: Docker Image CI
 
 on:
-  pull_request:
   push:
     tags:
       - '*'
@@ -29,4 +28,4 @@ jobs:
           build-args: |
             VERSION=${{ github.ref_name }}
           push: true
-          tags: youlatech/schema:latest
+          tags: youlatech/schema:latest,youlatech/schema:${{ github.ref_name }}

@@ -174,6 +174,8 @@ docker run youlatech/schema:latest schema
 go build -ldflags="-X 'main.Version=0.5'" -o schema ./cmd/schema/*.go
 ```
 
+The last binary can also be downloaded from [the releases page](https://github.com/youla-dev/schema/releases).
+
 ## CD/CD
 
 Example for the GitLab CI:
