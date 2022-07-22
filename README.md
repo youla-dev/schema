@@ -160,6 +160,14 @@ Utility gets configuration values with CLI flags (e.g. `--sr http://localhost:80
 
 The common environmental variables `SCHEMA_REGISTRY` and `CLUSTER` can be placed to the dotenv file located with `SCHEMA_CONFIG=/home/user/.schema_config` env variable.
 
+## Docker
+
+Run with docker:
+
+```bash
+docker run youlatech/schema:latest schema
+```
+
 ## Local build
 
 ```bash
@@ -172,7 +180,7 @@ Example for the GitLab CI:
 
 ```yaml
 producer1:schema-validate:
-  image: registry-gitlab.company.org/sr/schema:1.0
+  image: youlatech/schema:latest
   script:
     - schema validate --proto services/$PROTO --cluster ${KAFKA_CLUSTER} --sr ${SR}
   variables:
