@@ -1,13 +1,11 @@
 name: Go
 
 on:
-  pull_request:
   push:
     tags:
       - '*'
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
