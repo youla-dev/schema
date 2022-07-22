@@ -8,10 +8,7 @@ Utility for your CI/CD process to validate, register or delete Kafka protobuf sc
 > This utility uses [TopicRecordNameStrategy](https://docs.confluent.io/platform/current/schema-registry/serdes-develop/index.html#overview), 
 > which means that the subject for the value is defined as `<topic name>-<fully-qualified record name>-value`.
 > This utility operates only with topic and record values and hides subject name generation. 
-> Also, the ability to create schemes for the topic keys is not realized for now. 
-
-
-[[_TOC_]]
+> Also, the ability to create schemes for the topic keys is not realized for now.
 
 # Commands
 
