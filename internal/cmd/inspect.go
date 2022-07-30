@@ -1,6 +1,7 @@
-package main
+package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,27 +9,27 @@ import (
 
 	"github.com/pterm/pterm"
 	"github.com/riferrei/srclient"
-	"github.com/urfave/cli/v2"
 )
 
-func inspect(c *cli.Context) error {
-	record, kafkaTopic, versionStr := c.String(flagRecord.Name), c.String(flagTopicRequired.Name), c.String(flagVersion.Name)
-	validatingSubject := subjectName(kafkaTopic, record)
+type Inspect struct {
+	schemaRegistryClient srclient.ISchemaRegistryClient
+	topic, record        string
+	version              int
+}
 
-	var version int
-	if versionStr != "latest" {
-		var err error
-		version, err = strconv.Atoi(versionStr)
-		if err != nil {
-			return fmt.Errorf("version is invalid: %w", err)
-		}
-	}
+func NewInspect(schemaRegistryClient srclient.ISchemaRegistryClient, topic, record string, version int) (*Inspect, error) {
+	return &Inspect{
+		schemaRegistryClient: schemaRegistryClient,
+		topic:                topic,
+		record:               record,
+		version:              version,
+	}, nil
+}
 
-	schemaRegistryClient, err := getSRClient(c)
-	if err != nil {
-		return err
-	}
-	subjects, err := schemaRegistryClient.GetSubjects()
+func (i *Inspect) Run(c context.Context) error {
+	validatingSubject := subjectName(i.topic, i.record)
+
+	subjects, err := i.schemaRegistryClient.GetSubjects()
 	if err != nil {
 		return fmt.Errorf("can not get subjects: %w", err)
 	}
@@ -43,10 +44,10 @@ func inspect(c *cli.Context) error {
 	}
 
 	var schema *srclient.Schema
-	if version == 0 {
-		schema, err = schemaRegistryClient.GetLatestSchema(validatingSubject)
+	if i.version == 0 {
+		schema, err = i.schemaRegistryClient.GetLatestSchema(validatingSubject)
 	} else {
-		schema, err = schemaRegistryClient.GetSchemaByVersion(validatingSubject, version)
+		schema, err = i.schemaRegistryClient.GetSchemaByVersion(validatingSubject, i.version)
 	}
 	if err != nil {
 		return fmt.Errorf("error schema: %w", err)
