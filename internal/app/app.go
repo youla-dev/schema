@@ -136,7 +136,7 @@ func NewApp(version string) *App {
 		{
 			Name:   cmdVersions,
 			Usage:  "Lists available versions for the subject.",
-			Action: versions,
+			Action: app.versions,
 			Flags: []cli.Flag{
 				FlagSRRequired,
 				FlagTopicRequired,
@@ -259,6 +259,21 @@ func (a *App) validate(c *cli.Context) error {
 	}
 
 	v, err := cmd.NewValidate(schemaRegistryClient, clusterClient, topic, record, schemaBytes)
+	if err != nil {
+		return err
+	}
+	return v.Run(c.Context)
+}
+
+func (a *App) versions(c *cli.Context) error {
+	record, topic := c.String(FlagRecord.Name), c.String(FlagTopic.Name)
+
+	schemaRegistryClient, err := a.getSRClient(c)
+	if err != nil {
+		return err
+	}
+
+	v, err := cmd.NewVersions(schemaRegistryClient, topic, record)
 	if err != nil {
 		return err
 	}
