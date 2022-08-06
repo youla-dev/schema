@@ -112,7 +112,7 @@ func NewApp(version string) *App {
 			Name:      cmdDelete,
 			Usage:     "Deletes the specified version of the schema or deletes the latest version of the scheme by default.",
 			ArgsUsage: "Set the topic, record and version of the schema to delete.",
-			Action:    deleteSubject,
+			Action:    app.delete,
 			Flags: []cli.Flag{
 				FlagSRRequired,
 				FlagTopicRequired,
@@ -157,7 +157,7 @@ func NewApp(version string) *App {
 		{
 			Name:   cmdSubjects,
 			Usage:  "Lists available records for the topic.",
-			Action: subjects,
+			Action: app.subjects,
 			Flags: []cli.Flag{
 				FlagSRRequired,
 				FlagTopicRequired,
@@ -303,6 +303,21 @@ func (a *App) delete(c *cli.Context) error {
 		return err
 	}
 	return d.Run(c.Context)
+}
+
+func (a *App) subjects(c *cli.Context) error {
+	topic := c.String(FlagTopicRequired.Name)
+
+	schemaRegistryClient, err := a.getSRClient(c)
+	if err != nil {
+		return err
+	}
+
+	s, err := cmd.NewSubjects(schemaRegistryClient, topic)
+	if err != nil {
+		return err
+	}
+	return s.Run(c.Context)
 }
 
 func (a *App) getSRClient(c *cli.Context) (srclient.ISchemaRegistryClient, error) {
