@@ -16,10 +16,10 @@ require (
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.19.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/pterm/pterm v0.12.38
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/riferrei/srclient v0.5.4
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli/v2 v2.11.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.0
 )

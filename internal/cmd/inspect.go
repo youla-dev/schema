@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 
-	"github.com/pterm/pterm"
 	"github.com/riferrei/srclient"
 )
 
@@ -24,6 +22,14 @@ func NewInspect(schemaRegistryClient srclient.ISchemaRegistryClient, topic, reco
 		record:               record,
 		version:              version,
 	}, nil
+}
+
+type inspectOutput struct {
+	Subject    string `json:"subject"`
+	ID         int    `json:"id"`
+	Version    int    `json:"version"`
+	References string `json:"references"`
+	Schema     string `json:"schema"`
 }
 
 func (i *Inspect) Run(c context.Context) error {
@@ -58,19 +64,20 @@ func (i *Inspect) Run(c context.Context) error {
 		return fmt.Errorf("can not marshal references: %w", err)
 	}
 
-	tbl := pterm.DefaultTable.WithData(pterm.TableData{
-		{"Subject", validatingSubject},
-		{"ID", strconv.Itoa(schema.ID())},
-		{"Version", strconv.Itoa(schema.Version())},
-		{"References", string(references)},
-		{"Schema:"},
-	})
-	if err := tbl.Render(); err != nil {
-		return fmt.Errorf("can not render: %w", err)
+	output := inspectOutput{
+		Subject:    validatingSubject,
+		ID:         schema.ID(),
+		Version:    schema.Version(),
+		References: string(references),
+		Schema:     schema.Schema(),
 	}
 
-	fmt.Println()
-	fmt.Println(schema.Schema())
+	marshalledOutput, err := json.Marshal(output)
+	if err != nil {
+		return fmt.Errorf("can not marshall output: %w", err)
+	}
+
+	fmt.Println(string(marshalledOutput))
 
 	return nil
 }
