@@ -166,7 +166,7 @@ func NewApp(version string) *App {
 		{
 			Name:   cmdExport,
 			Usage:  "Exports the schema value to the local file.",
-			Action: export,
+			Action: app.export,
 			Flags: []cli.Flag{
 				FlagSRRequired,
 				FlagTopicRequired,
@@ -318,6 +318,39 @@ func (a *App) subjects(c *cli.Context) error {
 		return err
 	}
 	return s.Run(c.Context)
+}
+
+func (a *App) export(c *cli.Context) error {
+	record, topic, versionStr := c.String(FlagRecord.Name), c.String(FlagTopicRequired.Name), c.String(FlagVersion.Name)
+
+	var version int
+	if versionStr != "latest" {
+		var err error
+		version, err = strconv.Atoi(versionStr)
+		if err != nil {
+			return fmt.Errorf("version is invalid: %w", err)
+		}
+	}
+
+	schemaRegistryClient, err := a.getSRClient(c)
+	if err != nil {
+		return err
+	}
+
+	e, err := cmd.NewExport(schemaRegistryClient, topic, record, version)
+	if err != nil {
+		return err
+	}
+	output, err := e.Run(c.Context)
+	if err != nil {
+		return err
+	}
+
+	outputFile := c.String("output")
+	if err := os.WriteFile(outputFile, output, 0666); err != nil {
+		return fmt.Errorf("can not write scheme to the file: %w", err)
+	}
+	return nil
 }
 
 func (a *App) getSRClient(c *cli.Context) (srclient.ISchemaRegistryClient, error) {
