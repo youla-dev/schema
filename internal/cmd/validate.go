@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -10,20 +11,20 @@ import (
 	"github.com/youla-dev/schema/lib/protoschema"
 )
 
-type Register struct {
+type Validate struct {
 	schemaRegistryClient srclient.ISchemaRegistryClient
 	clusterClient        *saramaCluster.Client
 	topic, record        string
 	schemaBytes          []byte
 }
 
-func NewRegister(
+func NewValidate(
 	schemaRegistryClient srclient.ISchemaRegistryClient,
 	clusterClient *saramaCluster.Client,
 	topic, record string,
 	schemaBytes []byte,
-) (*Register, error) {
-	return &Register{
+) (*Validate, error) {
+	return &Validate{
 		schemaRegistryClient: schemaRegistryClient,
 		clusterClient:        clusterClient,
 		topic:                topic,
@@ -32,42 +33,41 @@ func NewRegister(
 	}, nil
 }
 
-func (r *Register) Run(ctx context.Context) error {
+func (v *Validate) Run(c context.Context) error {
 	t := srclient.Protobuf
 	var err error
-	if r.topic == "" || r.record == "" {
-		r.topic, r.record, err = protoschema.Parse(context.Background(), r.schemaBytes)
+	if v.topic == "" || v.record == "" {
+		v.topic, v.record, err = protoschema.Parse(context.Background(), v.schemaBytes)
 		if err != nil {
 			return fmt.Errorf("can not extract topic and record from proto: %w", err)
 		}
 	}
 
-	if r.topic == "" {
-		log.Println("topic is not set", r.topic)
+	if v.topic == "" {
+		log.Println("topic is not set", v.topic)
 		return nil
 	}
 
-	validatingSubject := subjectName(r.topic, r.record)
+	validatingSubject := subjectName(v.topic, v.record)
 
 	// Topic search
-	topics, err := r.clusterClient.Topics()
+	topics, err := v.clusterClient.Topics()
 	if err != nil {
 		return fmt.Errorf("can not list topics: %w", err)
 	}
 	var topicExists bool
 	for _, topic := range topics {
-		if r.topic == topic {
+		if v.topic == topic {
 			topicExists = true
 			break
 		}
 	}
 	if !topicExists {
-		log.Printf("topic %q not exist", r.topic)
+		log.Printf("topic %q not exist", v.topic)
 		return nil
 	}
 
-	// Does the topic exist
-	subjects, err := r.schemaRegistryClient.GetSubjects()
+	subjects, err := v.schemaRegistryClient.GetSubjects()
 	if err != nil {
 		return fmt.Errorf("can not get subjects: %w", err)
 	}
@@ -76,11 +76,20 @@ func (r *Register) Run(ctx context.Context) error {
 		subjectExist = subjectExist || subject == validatingSubject
 	}
 
-	schema, err := r.schemaRegistryClient.CreateSchema(validatingSubject, string(r.schemaBytes), t)
-	if err != nil {
-		return fmt.Errorf("error creating the schema %w", err)
+	if !subjectExist {
+		log.Printf("schema %q not exist yet", validatingSubject)
+		return nil
 	}
 
-	log.Println("Created schema ID", schema.ID(), ", version", schema.Version())
+	// Is the scheme compatible
+	compatible, err := v.schemaRegistryClient.IsSchemaCompatible(validatingSubject, string(v.schemaBytes), "latest", t)
+	if err != nil {
+		return fmt.Errorf("error validating schema: %w", err)
+	}
+	if !compatible {
+		return errors.New("schema is not compatible")
+	}
+
+	log.Println("schema is compatible")
 	return nil
 }

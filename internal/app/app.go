@@ -124,7 +124,7 @@ func NewApp(version string) *App {
 		{
 			Name:   cmdValidate,
 			Usage:  "Validates the topic to exist and the schema changes compatibility with existing version. The schema is also valid if the the topic or subject does not exists.",
-			Action: validate,
+			Action: app.validate,
 			Flags: []cli.Flag{
 				FlagClusterRequired,
 				FlagSRRequired,
@@ -237,6 +237,32 @@ func (a *App) register(c *cli.Context) error {
 		return err
 	}
 	return r.Run(c.Context)
+}
+
+func (a *App) validate(c *cli.Context) error {
+	record, topic := c.String(FlagRecord.Name), c.String(FlagTopic.Name)
+	protoFile := c.String(FlagProtoRequired.Name)
+
+	schemaRegistryClient, err := a.getSRClient(c)
+	if err != nil {
+		return err
+	}
+
+	clusterClient, err := a.getClusterClient(c)
+	if err != nil {
+		return err
+	}
+
+	schemaBytes, err := os.ReadFile(protoFile)
+	if err != nil {
+		return fmt.Errorf("error reading schema: %w", err)
+	}
+
+	v, err := cmd.NewValidate(schemaRegistryClient, clusterClient, topic, record, schemaBytes)
+	if err != nil {
+		return err
+	}
+	return v.Run(c.Context)
 }
 
 func (a *App) getSRClient(c *cli.Context) (srclient.ISchemaRegistryClient, error) {
