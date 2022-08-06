@@ -280,6 +280,31 @@ func (a *App) versions(c *cli.Context) error {
 	return v.Run(c.Context)
 }
 
+func (a *App) delete(c *cli.Context) error {
+	record, topic, versionStr := c.String(FlagRecord.Name), c.String(FlagTopicRequired.Name), c.String(FlagVersion.Name)
+	permanent := c.Bool(FlagPermanent.Name)
+
+	var version int
+	if versionStr != "latest" {
+		var err error
+		version, err = strconv.Atoi(versionStr)
+		if err != nil {
+			return fmt.Errorf("version is invalid: %w", err)
+		}
+	}
+
+	schemaRegistryClient, err := a.getSRClient(c)
+	if err != nil {
+		return err
+	}
+
+	d, err := cmd.NewDelete(schemaRegistryClient, topic, record, version, permanent)
+	if err != nil {
+		return err
+	}
+	return d.Run(c.Context)
+}
+
 func (a *App) getSRClient(c *cli.Context) (srclient.ISchemaRegistryClient, error) {
 	return srclient.CreateSchemaRegistryClient(c.String(FlagSRRequired.Name)), nil
 }
