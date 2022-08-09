@@ -89,9 +89,10 @@ type App struct {
 func NewApp(version string) *App {
 	app := &App{
 		cliApp: &cli.App{
-			Name:    "Schema Registry utility",
-			Version: version,
-			Usage:   "Utility for your CI/CD process to validate, register or delete Kafka protobuf schemes in the registry.",
+			Name:                 "Schema Registry utility",
+			Version:              version,
+			Usage:                "Utility for your CI/CD process to validate, register or delete Kafka protobuf schemes in the registry.",
+			EnableBashCompletion: true,
 		},
 	}
 	app.cliApp.Commands = []*cli.Command{

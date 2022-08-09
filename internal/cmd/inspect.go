@@ -72,7 +72,7 @@ func (i *Inspect) Run(c context.Context) error {
 		Schema:     schema.Schema(),
 	}
 
-	marshalledOutput, err := json.Marshal(output)
+	marshalledOutput, err := json.MarshalIndent(output, "", "\t")
 	if err != nil {
 		return fmt.Errorf("can not marshall output: %w", err)
 	}
