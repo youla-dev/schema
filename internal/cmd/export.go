@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -26,7 +27,7 @@ func NewExport(
 	}, nil
 }
 
-func (e *Export) Run(c context.Context) ([]byte, error) {
+func (e *Export) Run(c context.Context) (interface{}, error) {
 	validatingSubject := subjectName(e.topic, e.record)
 
 	subjects, err := e.schemaRegistryClient.GetSubjects()
@@ -53,5 +54,5 @@ func (e *Export) Run(c context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("error schema: %w", err)
 	}
 
-	return []byte(schema.Schema()), nil
+	return bytes.NewBufferString(schema.Schema()), nil
 }

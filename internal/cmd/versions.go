@@ -24,12 +24,12 @@ func NewVersions(
 	}, nil
 }
 
-func (v *Versions) Run(c context.Context) error {
+func (v *Versions) Run(c context.Context) (interface{}, error) {
 	validatingSubject := subjectName(v.topic, v.record)
 
 	subjects, err := v.schemaRegistryClient.GetSubjects()
 	if err != nil {
-		return fmt.Errorf("can not get subjects: %w", err)
+		return nil, fmt.Errorf("can not get subjects: %w", err)
 	}
 	var subjectExist bool
 	for _, subject := range subjects {
@@ -37,16 +37,12 @@ func (v *Versions) Run(c context.Context) error {
 	}
 
 	if !subjectExist {
-		return errors.New("schema not exist yet")
+		return nil, errors.New("schema not exist yet")
 	}
 
 	versions, err := v.schemaRegistryClient.GetSchemaVersions(validatingSubject)
 	if err != nil {
-		return fmt.Errorf("error getting versions: %w", err)
+		return nil, fmt.Errorf("error getting versions: %w", err)
 	}
-
-	for _, version := range versions {
-		fmt.Println(version)
-	}
-	return nil
+	return versions, nil
 }

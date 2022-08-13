@@ -23,22 +23,23 @@ func NewSubjects(
 	}, nil
 }
 
-func (s *Subjects) Run(c context.Context) error {
+func (s *Subjects) Run(c context.Context) (interface{}, error) {
 	r, err := regexp.Compile(fmt.Sprintf(`%s-\w+-value`, s.topic))
 	if err != nil {
-		return fmt.Errorf("can not use topic name: %w", err)
+		return nil, fmt.Errorf("can not use topic name: %w", err)
 	}
 
 	subjects, err := s.schemaRegistryClient.GetSubjects()
 	if err != nil {
-		return fmt.Errorf("can not get subjects: %w", err)
+		return nil, fmt.Errorf("can not get subjects: %w", err)
 	}
 
+	filtered := make([]string, 0, len(subjects))
 	for _, subject := range subjects {
 		if r.MatchString(subject) {
-			fmt.Println(subject)
+			filtered = append(filtered, subject)
 		}
 	}
 
-	return nil
+	return filtered, nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	saramaCluster "github.com/bsm/sarama-cluster"
 	"github.com/riferrei/srclient"
@@ -33,19 +32,18 @@ func NewValidate(
 	}, nil
 }
 
-func (v *Validate) Run(c context.Context) error {
+func (v *Validate) Run(c context.Context) (interface{}, error) {
 	t := srclient.Protobuf
 	var err error
 	if v.topic == "" || v.record == "" {
 		v.topic, v.record, err = protoschema.Parse(context.Background(), v.schemaBytes)
 		if err != nil {
-			return fmt.Errorf("can not extract topic and record from proto: %w", err)
+			return nil, fmt.Errorf("can not extract topic and record from proto: %w", err)
 		}
 	}
 
 	if v.topic == "" {
-		log.Println("topic is not set", v.topic)
-		return nil
+		return nil, fmt.Errorf("topic %q is invalid", v.topic)
 	}
 
 	validatingSubject := subjectName(v.topic, v.record)
@@ -53,7 +51,7 @@ func (v *Validate) Run(c context.Context) error {
 	// Topic search
 	topics, err := v.clusterClient.Topics()
 	if err != nil {
-		return fmt.Errorf("can not list topics: %w", err)
+		return nil, fmt.Errorf("can not list topics: %w", err)
 	}
 	var topicExists bool
 	for _, topic := range topics {
@@ -63,13 +61,12 @@ func (v *Validate) Run(c context.Context) error {
 		}
 	}
 	if !topicExists {
-		log.Printf("topic %q not exist", v.topic)
-		return nil
+		return fmt.Sprintf("topic %q not exist", v.topic), nil
 	}
 
 	subjects, err := v.schemaRegistryClient.GetSubjects()
 	if err != nil {
-		return fmt.Errorf("can not get subjects: %w", err)
+		return nil, fmt.Errorf("can not get subjects: %w", err)
 	}
 	var subjectExist bool
 	for _, subject := range subjects {
@@ -77,19 +74,17 @@ func (v *Validate) Run(c context.Context) error {
 	}
 
 	if !subjectExist {
-		log.Printf("schema %q not exist yet", validatingSubject)
-		return nil
+		return fmt.Sprintf("schema %q not exist yet", validatingSubject), nil
 	}
 
 	// Is the scheme compatible
 	compatible, err := v.schemaRegistryClient.IsSchemaCompatible(validatingSubject, string(v.schemaBytes), "latest", t)
 	if err != nil {
-		return fmt.Errorf("error validating schema: %w", err)
+		return nil, fmt.Errorf("error validating schema: %w", err)
 	}
 	if !compatible {
-		return errors.New("schema is not compatible")
+		return nil, errors.New("schema is not compatible")
 	}
 
-	log.Println("schema is compatible")
-	return nil
+	return "schema is compatible", nil
 }

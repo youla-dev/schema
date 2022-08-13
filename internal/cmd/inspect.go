@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/riferrei/srclient"
 )
@@ -32,12 +31,12 @@ type inspectOutput struct {
 	Schema     string `json:"schema"`
 }
 
-func (i *Inspect) Run(c context.Context) error {
+func (i *Inspect) Run(c context.Context) (interface{}, error) {
 	validatingSubject := subjectName(i.topic, i.record)
 
 	subjects, err := i.schemaRegistryClient.GetSubjects()
 	if err != nil {
-		return fmt.Errorf("can not get subjects: %w", err)
+		return nil, fmt.Errorf("can not get subjects: %w", err)
 	}
 	var subjectExist bool
 	for _, subject := range subjects {
@@ -45,8 +44,7 @@ func (i *Inspect) Run(c context.Context) error {
 	}
 
 	if !subjectExist {
-		log.Println("schema not exist yet")
-		return nil
+		return "schema not exist yet", nil
 	}
 
 	var schema *srclient.Schema
@@ -56,12 +54,12 @@ func (i *Inspect) Run(c context.Context) error {
 		schema, err = i.schemaRegistryClient.GetSchemaByVersion(validatingSubject, i.version)
 	}
 	if err != nil {
-		return fmt.Errorf("error schema: %w", err)
+		return nil, fmt.Errorf("error schema: %w", err)
 	}
 
 	references, err := json.Marshal(schema.References())
 	if err != nil {
-		return fmt.Errorf("can not marshal references: %w", err)
+		return nil, fmt.Errorf("can not marshal references: %w", err)
 	}
 
 	output := inspectOutput{
@@ -72,12 +70,5 @@ func (i *Inspect) Run(c context.Context) error {
 		Schema:     schema.Schema(),
 	}
 
-	marshalledOutput, err := json.MarshalIndent(output, "", "\t")
-	if err != nil {
-		return fmt.Errorf("can not marshall output: %w", err)
-	}
-
-	fmt.Println(string(marshalledOutput))
-
-	return nil
+	return output, nil
 }

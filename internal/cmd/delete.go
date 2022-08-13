@@ -28,7 +28,7 @@ func NewDelete(
 	}, nil
 }
 
-func (d *Delete) Run(c context.Context) error {
+func (d *Delete) Run(c context.Context) (interface{}, error) {
 	subject := subjectName(d.topic, d.record)
 	var err error
 
@@ -38,5 +38,5 @@ func (d *Delete) Run(c context.Context) error {
 		err = d.schemaRegistryClient.DeleteSubjectByVersion(subject, d.version, d.permanent)
 	}
 
-	return err
+	return nil, err
 }
